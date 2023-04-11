@@ -1,6 +1,6 @@
 import React, {useEffect, useReducer} from "react"
 
-const LEVELS = [ // 0=playground, 1=wall, 2=box, 4=point, 5=player, 8=world
+const LEVELS = [ // 0=playground, 1=wall, 2=box, 4=point, 5=player, 8=transparent
     [  
       [8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8],
       [8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8],
@@ -95,13 +95,33 @@ function GameReducer(state, action) {
   }
   return state
 }
+function getColor(y,x, color, player, box, isStorage) {
+  if (player.y === y && player.x === x)                   return ITEM.Player
+  if (box.find( b => (b.y===y && b.x===x)) && isStorage ) return COLOR_IN_PLACE
+  if (box.find( b => (b.y===y && b.x===x)))               return ITEM.Box  
+  return color
+}
+export default function Sokoban() {
+  let [state, dispatch] = useReducer(GameReducer, getInitialState(0) )
+  console.log(state)
+
+  function handleMove(e) {
+    if ( [DIRECTION.Left, DIRECTION.Right, DIRECTION.Up, DIRECTION.Down].includes(e.keyCode) ) {
+      e.preventDefault(); 
+      dispatch({type: ACTION.Move, keyCode: e.keyCode}) 
+    }
+  }
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleMove); 
+    return () => { document.removeEventListener('keydown', handleMove); }              
+  });  
 return (
   <div className="Sokoban">
     <div>SOKOBAN</div>
     <h3>Aby wygrać należy przesunąć skrzynki w odpowiednie miejsca</h3>
     <button onClick={()=> dispatch({type: ACTION.RestartLevel})}>Restart level</button>
-    {state.status === GAME_STATE.Done && 
-    <h3>Wygrałeś!</h3>}
+    {state.status === GAME_STATE.Done && <h3>Wygrałeś!</h3>}
       {[...state.level].map( (row, y) => {
         return <div key={`${y}`} style={{display: 'block', lineHeight: 0}}>{
           row.map( (col, x) => {return <div key={`${y}-${x}`} style={{backgroundColor: COLOR[getColor(y,x, col, state.player, state.box, state.level[y][x]===ITEM.Storage)], width: "20px", height:"20px", display:"inline-block", border: state.level[y][x]===ITEM.World ? '1px solid transparent': '1px solid #ccc'}}/>})  
@@ -109,3 +129,4 @@ return (
       })}
   </div>
 );
+}
