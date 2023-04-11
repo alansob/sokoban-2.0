@@ -95,3 +95,17 @@ function GameReducer(state, action) {
   }
   return state
 }
+return (
+  <div className="Sokoban">
+    <div>SOKOBAN</div>
+    <h3>Aby wygrać należy przesunąć skrzynki w odpowiednie miejsca</h3>
+    <button onClick={()=> dispatch({type: ACTION.RestartLevel})}>Restart level</button>
+    {state.status === GAME_STATE.Done && 
+    <h3>Wygrałeś!</h3>}
+      {[...state.level].map( (row, y) => {
+        return <div key={`${y}`} style={{display: 'block', lineHeight: 0}}>{
+          row.map( (col, x) => {return <div key={`${y}-${x}`} style={{backgroundColor: COLOR[getColor(y,x, col, state.player, state.box, state.level[y][x]===ITEM.Storage)], width: "20px", height:"20px", display:"inline-block", border: state.level[y][x]===ITEM.World ? '1px solid transparent': '1px solid #ccc'}}/>})  
+        }</div> 
+      })}
+  </div>
+);
